@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Турнир — Kraken Chronicles</title>
+    <!-- Стандартный фавикон для всех браузеров -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <!-- Для современных браузеров -->
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+
+    <!-- Для устройств Apple (iPhone, iPad) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
+    <!-- Для Android Chrome -->
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="viewer-mode">
+    <!-- Кнопка выхода из админ-режима -->
+    <button id="admin-exit-btn" class="admin-exit-btn" title="Выйти из режима администратора">✕</button>
+
+    <header>
+        <h1>Турнир — Kraken Chronicles</h1>
+        <p>По игре Call of Dragons</p>
+    </header>
+
+    <div class="container">
+        <!-- ==================== РАСПИСАНИЕ ТУРНИРА ==================== -->
+        <div class="schedule-section" style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 1rem;">
+                <h2 style="margin-bottom: 0;">РАСПИСАНИЕ ТУРНИРА (UTC)</h2>
+                <div id="utc-time-header" style="font-size: 0.8rem; color: #888888; font-family: monospace;">
+                    UTC: --:--
+                </div>
+            </div>
+            <div class="schedule-period-container">
+                <div class="schedule-card schedule-period" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span class="schedule-label schedule-label-bold">НАЧАЛО/ОКОНЧАНИЕ ТУРНИРА:</span>
+                        <div class="period-dates">
+                            <span id="tournament-period-start" class="schedule-value schedule-value-large">—</span>
+                            <span class="schedule-label">—</span>
+                            <span id="tournament-period-end" class="schedule-value schedule-value-large">—</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="schedule-label schedule-label-bold">ПРИЗОВОЙ ФОНД:</span>
+                        <span id="prize-pool" class="schedule-value schedule-value-large">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="matches-schedule">
+                <div class="match-schedule-item">
+                    <span class="schedule-label schedule-label-bold">ГРУППОВОЙ ЭТАП:</span>
+                    <div class="period-dates">
+                        <span id="qf-period-start" class="schedule-value">—</span>
+                        <span class="schedule-label">—</span>
+                        <span id="qf-period-end" class="schedule-value">—</span>
+                    </div>
+                </div>
+                <div class="match-schedule-item">
+                    <span class="schedule-label schedule-label-bold">ПЛЕЙ-ОФФ:</span>
+                    <div class="period-dates">
+                        <span id="sf-period-start" class="schedule-value">—</span>
+                        <span class="schedule-label">—</span>
+                        <span id="sf-period-end" class="schedule-value">—</span>
+                    </div>
+                </div>
+                <div class="match-schedule-item">
+                    <span class="schedule-label schedule-label-bold">ГРАНД-ФИНАЛ:</span>
+                    <span id="final-datetime" class="schedule-value schedule-value-large">—</span>
+                </div>
+            </div>
+
+            <!-- Таймер до ближайшего матча -->
+            <div id="countdown-timer" class="countdown-timer" style="display: none;">
+                <span class="schedule-label schedule-label-bold">До следующего матча:</span>
+                <span id="next-match-timer" class="schedule-value">—</span>
+            </div>
+
+            <button id="edit-schedule-btn" class="btn-secondary admin-only" style="margin-top: 1rem; display: none;">Редактировать расписание</button>
+
+            <div id="schedule-editor" class="admin-only" style="display: none; margin-top: 1rem;">
+                <div style="background: #0a1628; padding: 0.5rem; border-radius: 4px; margin-bottom: 1rem;">
+                    <span style="color: #ccaa66; font-size: 0.8rem;">⚠️ ВСЕ ДАТЫ ВВОДЯТСЯ В UTC</span>
+                </div>
+                <div class="schedule-edit-grid">
+                    <div class="edit-group">
+                        <label>Период турнира (UTC)</label>
+                        <div class="date-range">
+                            <input type="datetime-local" id="edit-period-start" placeholder="Начало">
+                            <span>—</span>
+                            <input type="datetime-local" id="edit-period-end" placeholder="Окончание">
+                        </div>
+                    </div>
+                    <div class="edit-group">
+                        <label>Групповой этап (UTC)</label>
+                        <div class="date-range">
+                            <input type="datetime-local" id="edit-qf-start" placeholder="Начало">
+                            <span>—</span>
+                            <input type="datetime-local" id="edit-qf-end" placeholder="Окончание">
+                        </div>
+                    </div>
+                    <div class="edit-group">
+                        <label>Плей-офф (UTC)</label>
+                        <div class="date-range">
+                            <input type="datetime-local" id="edit-sf-start" placeholder="Начало">
+                            <span>—</span>
+                            <input type="datetime-local" id="edit-sf-end" placeholder="Окончание">
+                        </div>
+                    </div>
+                    <div class="edit-group">
+                        <label>Гранд-финал (UTC)</label>
+                        <input type="datetime-local" id="edit-final">
+                    </div>
+                    <div class="edit-group">
+                        <label>Призовой фонд</label>
+                        <input type="text" id="edit-prize-pool" placeholder="Например: 1 000 000 ₽">
+                    </div>
+                </div>
+                <button id="save-schedule" class="btn-primary" style="margin-top: 0.5rem;">Сохранить расписание</button>
+            </div>
+        </div>
+
+        <!-- ==================== ЖЕРЕБЬЁВКА ==================== -->
+        <div class="draw-section" style="margin-bottom: 2rem;">
+            <h2>ЖЕРЕБЬЁВКА КОМАНД (2 группы по 4 команды)</h2>
+            <div class="draw-info">
+                <p>Введите названия 8 команд ниже. Нажимайте кнопки по очереди, чтобы распределить команды по группам.</p>
+                <p><strong>Группа A</strong> — 4 команды | <strong>Группа B</strong> — 4 команды</p>
+            </div>
+
+            <div class="teams-input">
+                <div class="input-group">
+                    <label>Команда 1</label>
+                    <input type="text" id="team1" class="team-name-input" placeholder="Название команды">
+                    <input type="text" id="team1_avatar" class="team-avatar-input" placeholder="Ссылка на аватар (URL)">
+                </div>
+                <div class="input-group">
+                    <label>Команда 2</label>
+                    <input type="text" id="team2" class="team-name-input" placeholder="Название команды">
+                    <input type="text" id="team2_avatar" class="team-avatar-input" placeholder="Ссылка на аватар (URL)">
+                </div>
+                <div class="input-group">
+                    <label>Команда 3</label>
+                    <input type="text" id="team3" class="team-name-input" placeholder="Название команды">
+                    <input type="text" id="team3_avatar" class="team-avatar-input" placeholder="Ссылка на аватар (URL)">
+                </div>
+                <div class="input-group">
+                    <label>Команда 4</label>
+                    <input type="text" id="team4" class="team-name-input" placeholder="Название команды">
+                    <input type="text" id="team4_avatar" class="team-avatar-input" placeholder="Ссылка на аватар (URL)">
+                </div>
+                <div class="input-group">
+                    <label>Команда 5</label>
+                    <input type="text" id="team5" class="team-name-input" placeholder="Название команды">
+                    <input type="text" id="team5_avatar" class="team-avatar-input" placeholder="Ссылка на аватар (URL)">
+                </div>
+                <div class="input-group">
+                    <label>Команда 6</label>
+                    <input type="text" id="team6" class="team-name-input" placeholder="Название команды">
+                    <input type="text" id="team6_avatar" class="team-avatar-input" placeholder="Ссылка на аватар (URL)">
+                </div>
+                <div class="input-group">
+                    <label>Команда 7</label>
+                    <input type="text" id="team7" class="team-name-input" placeholder="Название команды">
+                    <input type="text" id="team7_avatar" class="team-avatar-input" placeholder="Ссылка на аватар (URL)">
+                </div>
+                <div class="input-group">
+                    <label>Команда 8</label>
+                    <input type="text" id="team8" class="team-name-input" placeholder="Название команды">
+                    <input type="text" id="team8_avatar" class="team-avatar-input" placeholder="Ссылка на аватар (URL)">
+                </div>
+            </div>
+
+            <div class="draw-actions">
+                <div class="draw-buttons-left admin-only">
+                    <button id="draw-group-a1" class="btn-primary draw-step" data-step="1">В группу A (команды 1-2)</button>
+                    <button id="draw-group-b1" class="btn-primary draw-step" data-step="2" disabled>В группу B (команды 3-4)</button>
+                    <button id="draw-group-a2" class="btn-primary draw-step" data-step="3" disabled>В группу A (команды 5-6)</button>
+                    <button id="draw-group-b2" class="btn-primary draw-step" data-step="4" disabled>В группу B (команды 7-8)</button>
+                </div>
+                <div class="draw-buttons-right admin-only">
+                    <button id="save-draw" class="btn-primary" style="display: none;">Сохранить жеребьёвку</button>
+                    <button id="clear-teams" class="btn-secondary">Очистить команды</button>
+                </div>
+            </div>
+
+            <div id="draw-status" class="draw-status"></div>
+        </div>
+
+        <!-- ==================== ГРУППОВОЙ ЭТАП ==================== -->
+        <div class="groups-section" style="margin-bottom: 2rem;">
+            <h2>ГРУППОВОЙ ЭТАП</h2>
+            <div class="groups-container" id="groupsContainer"></div>
+        </div>
+
+        <!-- ==================== ПЛЕЙ-ОФФ ==================== -->
+        <div class="playoffs-section" style="margin-bottom: 2rem;">
+            <h2>ПЛЕЙ-ОФФ</h2>
+            <div class="playoffs-container">
+                <!-- Верхняя сетка -->
+                <div class="upper-bracket">
+                    <h3>ВЕРХНЯЯ СЕТКА</h3>
+                    <div id="upper-bracket-matches" class="playoff-matches"></div>
+                </div>
+
+                <!-- Нижняя сетка -->
+                <div class="lower-bracket">
+                    <h3>НИЖНЯЯ СЕТКА (LOSERS)</h3>
+                    <div style="margin-bottom: 1rem;">
+                        <div class="match-label">ПОЛУФИНАЛ</div>
+                        <div id="lower-semi-match"></div>
+                    </div>
+                    <div>
+                        <div class="match-label">ФИНАЛ</div>
+                        <div id="lower-final-match"></div>
+                    </div>
+                </div>
+
+                <!-- Гранд-финал -->
+                <div class="final-bracket">
+                    <h3>ГРАНД-ФИНАЛ</h3>
+                    <div id="final-match" class="final-match-playoff"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== РЕЗУЛЬТАТЫ ТУРНИРА ==================== -->
+        <div class="results-section" style="margin-bottom: 2rem;">
+            <h2>РЕЗУЛЬТАТЫ ТУРНИРА</h2>
+            <div class="results-container">
+                <div class="results-header">
+                    <div class="result-place-header">МЕСТО</div>
+                    <div class="result-team-header">КОМАНДА</div>
+                    <div class="result-wins-header">ПОБЕДЫ</div>
+                    <div class="result-points-header">ОЧКИ</div>
+                    <div class="result-prize-header">ПРИЗ</div>
+                </div>
+                <div class="results-list" id="results-list">
+                    <!-- Результаты будут заполняться динамически -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== АДМИН-ПАНЕЛЬ ==================== -->
+    <div id="admin-panel" style="display: none; margin-bottom: 2rem;">
+        <h2>Доступ администратора</h2>
+        <input type="password" id="admin-pass" placeholder="Введите пароль">
+        <button id="unlock-admin" class="btn-secondary">Войти</button>
+
+        <div id="admin-controls" style="display: none; margin-top: 20px;">
+            <h3>Редактирование матчей</h3>
+            <div id="match-editor"></div>
+            
+            <!-- Блок призового фонда -->
+            <div class="prize-section" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #2a2a2a;">
+                <h3 style="color: #ccaa66; margin-bottom: 1rem;">ПРИЗОВОЙ ФОНД ПО МЕСТАМ</h3>
+                <div class="prize-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+                    <div class="prize-item">
+                        <label style="color: #ccaa66;">1 МЕСТО</label>
+                        <input type="text" id="prize-1" class="prize-input" placeholder="Сумма или приз" style="width: 100%; padding: 0.5rem; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; color: #fff;">
+                    </div>
+                    <div class="prize-item">
+                        <label style="color: #aaaaaa;">2 МЕСТО</label>
+                        <input type="text" id="prize-2" class="prize-input" placeholder="Сумма или приз" style="width: 100%; padding: 0.5rem; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; color: #fff;">
+                    </div>
+                    <div class="prize-item">
+                        <label style="color: #cd7f32;">3 МЕСТО</label>
+                        <input type="text" id="prize-3" class="prize-input" placeholder="Сумма или приз" style="width: 100%; padding: 0.5rem; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; color: #fff;">
+                    </div>
+                    <div class="prize-item">
+                        <label>4 МЕСТО</label>
+                        <input type="text" id="prize-4" class="prize-input" placeholder="Сумма или приз" style="width: 100%; padding: 0.5rem; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; color: #fff;">
+                    </div>
+                    <div class="prize-item">
+                        <label>5 МЕСТО</label>
+                        <input type="text" id="prize-5" class="prize-input" placeholder="Сумма или приз" style="width: 100%; padding: 0.5rem; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; color: #fff;">
+                    </div>
+                    <div class="prize-item">
+                        <label>6 МЕСТО</label>
+                        <input type="text" id="prize-6" class="prize-input" placeholder="Сумма или приз" style="width: 100%; padding: 0.5rem; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; color: #fff;">
+                    </div>
+                    <div class="prize-item">
+                        <label>7 МЕСТО</label>
+                        <input type="text" id="prize-7" class="prize-input" placeholder="Сумма или приз" style="width: 100%; padding: 0.5rem; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; color: #fff;">
+                    </div>
+                    <div class="prize-item">
+                        <label>8 МЕСТО</label>
+                        <input type="text" id="prize-8" class="prize-input" placeholder="Сумма или приз" style="width: 100%; padding: 0.5rem; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; color: #fff;">
+                    </div>
+                </div>
+                <button id="save-prizes" class="btn-primary" style="margin-top: 1rem;">СОХРАНИТЬ ПРИЗЫ</button>
+            </div>
+            
+            <button id="save-changes" class="btn-primary" style="margin-top: 1rem;">Сохранить в Google таблицу</button>
+            <button id="full-reset-btn" class="btn-secondary" style="margin-top: 10px; width: 100%;">Полный сброс турнира</button>
+            <div id="sync-status"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <p>Данные синхронизируются с Google Sheets
+                <button id="force-refresh" class="refresh-btn">↻</button>
+            </p>
+        </div>
+    </footer>
+    
+    <script src="js/main.js"></script>
+</body>
+</html>
